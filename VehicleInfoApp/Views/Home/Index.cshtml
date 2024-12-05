@@ -1,0 +1,110 @@
+﻿@using VehicleService.DTO
+@model Tuple<VehicleInfoApp.Models.CarMakeResponseModel, VehicleInfoApp.Models.CarMakeIdYearresponsModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+
+    var vehicleTypes = ViewBag.VehicleTypes as VehicleTypeResponse ?? null;
+    int year = ViewBag.Year;
+    string makeName = ViewBag.MakeName;
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <div class="text-center">
+        <h1 class="mb-3">Vehicle Information System</h1>
+        <p class="lead mb-4">Search for vehicle makes, models, and types</p>
+        <p><strong>Make Name:</strong> @makeName</p>
+    </div>
+    <link rel="stylesheet" href="~/css/site.css" />
+
+</head>
+<body>
+    <form method="get" action="@Url.Action("Index")">
+        <div class="form-group">
+            <label for="makeId">Select Make:</label>
+            <select name="makeId" id="makeId" class="form-control select2">
+                <option value="">@makeName</option>
+                @foreach (var data in Model.Item1.Results)
+                {
+                    <option value="@data.ID">@data.MakeName  (ID: @data.ID)</option>
+
+                }
+            </select>
+        </div>
+        <br />
+        <br />
+        <div class="form-group">
+            <label for="year">Select Year:</label>
+            <br />
+            <input type="number" id="year" name="year" class="form-control" min="1995" max="@DateTime.Now.Year" step="1" value="@year" />
+        </div>
+        <br />
+
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="vehicle-grid">
+        @foreach (var vehicle in Model.Item2.Results)
+        {
+            <div class="vehicle-card">
+                <h3>@vehicle.ModelName</h3>
+                <p>Make: @vehicle.MakName</p>
+                <div>
+                    @if (vehicleTypes is null)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            No vehicle types available for this make.
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var type in vehicleTypes.Results)
+                        {
+                            <span class="type-badge">@type.VehicleTypeName</span>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+
+    @*     <div class="pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@Url.Action("Index", new { makeId = ViewBag.MakeId, year = ViewBag.Year, page = Model.PageIndex - 1 })">&laquo; Previous</a>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <a href="@Url.Action("Index", new { makeId = ViewBag.MakeId, year = ViewBag.Year, page = i })"
+               class="@(i == Model.PageIndex ? "active" : "")">
+                @i
+            </a>
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@Url.Action("Index", new { makeId = ViewBag.MakeId, year = ViewBag.Year, page = Model.PageIndex + 1 })">Next &raquo;</a>
+        }
+    </div> *@
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    // Avoid conflicts with other JS libraries if needed
+    var js = jQuery.noConflict();
+    js(document).ready(function () {
+        js('#makeId').select2({
+            // placeholder: 'Search and select a make',
+            allowClear: true, // Enables clear button
+            width: '100%', // Full-width dropdown
+        });
+    });
+</script>
